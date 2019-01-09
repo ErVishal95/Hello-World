@@ -1,0 +1,78 @@
+1. Java 8 Interface provide - Default and static method definetion with in Interface.
+
+2. Class Implementing multiple interfaces with Default Method defined inside interface.
+	How to remove Conflict of using method (with same name) whose definition was provided in multiple interfaces 
+	 
+	i)	Interface 1:-
+		
+		public interface A{
+			default void check(){
+				System.out.println("Checking A");
+			}
+		}
+		
+	ii)	Interface 2:-
+		
+		public interface B{
+			default void check(){
+				
+				System.out.println("Checking B");
+			}
+		}
+		
+	iii) Class implementing interfaces A, B:-
+	
+		public class C implements A, B{
+			@override						// Here overriding the default method resolve the issue
+			public void check(){		    // A & B interface check() logic is not used here as we override the method
+				.
+				.
+				. // some class C custome logic goes here
+			}
+		}
+		
+	iv) Utilizing check() method from one of interface(A or B) in implemetned class C and making it sure that no ambiguty should arive
+		
+		public class C implements A, B{
+			@override						// Here overriding the default method resolve the issue
+			public void check(){		    // A & B interface check() logic is not used here as we override the method
+				
+				return A.super.check();
+			 //	return A.super.check() +" "+ B.super.check();
+			}
+		}
+		
+3.	Static Method in Interface:-
+		a) Creating static method in interface provide the facility to club a group of methods in to a single place for a utility perpose
+		b) As static method have class level scope, we can directly execute the static method using interface name
+				e.g.; public interface InterfaceA{
+						
+						static String doSomething(){
+						
+							System.out.println("check InterfaceA");
+						}
+					}
+					
+					Executing doSomething() method:- 
+							
+							IntrfaceA.doSomething() //Output:- check InterfaceA
+		
+		c) Static method can be used within Defalut or static method inside the Interface itself
+				
+			  e.g.; public interface B{
+			  
+						default void check(){
+							
+							B.doSomething();   					//Using Static method inside default method
+							System.out.println("Checking B");
+							}
+						
+						static String doSomething(){
+							System.out.println("check InterfaceA");
+						}						
+					}
+					
+4)  If Abstract class provide all these facilities by default then why to use Interface
+		
+		i)  abstract classes can have constructors, state, and behavior while interface can have abstract, defalut or static method only.
+		ii) Creating static method in interface provide the facility to club a group of methods in to a single place for a utility perpose.
