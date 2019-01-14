@@ -1,0 +1,93 @@
+//IDENTIFY UNIQUE ELEMENTS FROM A GIVEN ARRAY
+
+//APPROACH 1 - USING ARRAYLIST (WITH CONTAINS MATHOD)
+
+import java.util.*;
+public class RemoveDuplicate{
+    
+    public static ArrayList<Integer> unique(ArrayList<Integer> list){
+        ArrayList<Integer> al = new ArrayList<Integer>();
+        
+        for(Integer l:list){
+            if(!al.contains(l)){
+                al.add(l);
+            }
+        }
+        return al;
+        
+    }
+    
+    public static void main(String args[]){
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Enter the digit for size of array");
+        int size = sc.nextInt();
+        
+        System.out.println("size of array :- "+size);
+        Integer[] arr= new Integer[size];
+       for(int i =0; i<arr.length; i++){
+            
+             arr[i] =sc.nextInt();
+        }
+         System.out.print("Array Entered is:- ");
+        
+        for(int j = 0; j < arr.length; j++) {
+            System.out.print(arr[j]+" ");}
+    
+        ArrayList<Integer> list= new ArrayList<Integer>(Arrays.asList(arr));
+        System.out.println();
+        
+        System.out.println("ArrayList with duplicates: "+ list); 
+        ArrayList<Integer> alInt = unique(list);
+        System.out.println("ArrayList of Unique Elements:- "+alInt);
+        
+    }
+}
+
+INPUTS:- 5 // ARRAY SIZE
+		2 // ARRAY ELEMENTS
+		1
+		3
+		2
+		3
+OUTPUT:- 
+		Enter the digit for size of array
+		size of array :- 5
+		Array Entered is:- 2 1 3 2 3 
+		ArrayList with duplicates: [2, 1, 3, 2, 3]
+		ArrayList of Unique Elements:- [2, 1, 3]
+	
+	
+//APPROACH 2 - USING LinkedHashSet for identifying unique elements in a given ArrayList\
+
+//Set internaly implements HashMap and this makes Set to contain unique elements only
+
+	 import java.util.*;
+	public class RemoveDuplicate{
+		
+		public static ArrayList<Integer> unique(ArrayList<Integer> list){
+			/*ArrayList<Integer> al = new ArrayList<Integer>();
+			
+			for(Integer l:list){
+				if(!al.contains(l)){
+					al.add(l);
+				}
+			}*/
+			Set<Integer> hs = new LinkedHashSet<Integer>();
+			hs.addAll(list);
+			list.clear();
+			list.addAll(hs);
+			return list;
+			
+		}
+		
+		public static void main(String args[]){
+			Scanner sc = new Scanner(System.in);
+			System.out.println("Enter the digit for size of array");
+			int size = sc.nextInt();
+		  
+			.
+			.
+			...
+			
+		}
+	}	
