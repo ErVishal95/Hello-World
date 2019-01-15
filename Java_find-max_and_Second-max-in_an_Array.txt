@@ -1,0 +1,78 @@
+//Identify the Maximum and Second Maximum element in an array using Array, ArrayList and HashMap.
+
+
+import java.util.*;
+public class RemoveDuplicate{
+  
+  //Method for returning the hashmap with elements as key and their count as values
+  
+    public static HashMap<Integer, Integer> unique(ArrayList<Integer> list){
+        HashMap<Integer, Integer> hm = new HashMap<Integer, Integer>();
+        for(int i=0; i<list.size(); i++){
+            
+            if(hm.containsKey(list.get(i))){
+                hm.put(list.get(i), hm.get(list.get(i))+1);
+               // hm.put(list.get(i), count++);
+               System.out.println(list.get(i)+" "+hm.get(list.get(i)));
+            }
+            else
+                hm.put(list.get(i), 1);
+        }
+        return hm;
+    }
+    
+    public static void main(String args[]){
+        Scanner sc = new Scanner(System.in);					  //Scanner class for taking inputs
+        System.out.println("Enter the digit for size of array"); 
+        int size = sc.nextInt();									//Taking Array size input
+        
+        System.out.println("size of array :- "+size);
+        Integer[] arr= new Integer[size];
+        int count= 0;											// Counting the input element of array and checking count= size or not
+        
+        try{
+         for(int i =0; i<arr.length; i++){
+             arr[i] =sc.nextInt();
+             count++;
+            }   
+        }catch(Exception e){
+            System.out.println("Array Entered is not as per size, count= "+count+" is less then size= "+size); //printing count and size
+            e.printStackTrace();																			   // printing exception in case of count < sie
+        }
+
+        System.out.print("Array Entered is:- ");    
+        for(int j = 0; j < arr.length; j++) {
+            System.out.print(arr[j]+" ");															//printing inserted array 
+        }
+        
+        ArrayList<Integer> list= new ArrayList<Integer>(Arrays.asList(arr));						//converting array into arraylist
+        System.out.println();
+        
+        System.out.println("ArrayList with duplicates: "+ list); 									//printing inserted ArrayList 
+        
+        HashMap<Integer, Integer> hmap = unique(list);												//Calling unique function that return hashmap object
+        System.out.println("Hashmep of Elements with their multiple occurenece:- "+hmap);
+        
+        int max=-1, another_max=-1, value=0, value_2=0;
+        for(Map.Entry<Integer, Integer> entry: hmap.entrySet()){									//Itrating hashmap 
+            if(max<entry.getValue()){
+                max=entry.getValue();																//getting first max value
+                if(entry.getKey()==null){
+                    continue;																		//skipping hashmap key for key=null
+                }
+                value= entry.getKey();																//getting first max Key
+            }
+            if(another_max<entry.getValue() && entry.getKey()!=value){								//getting second max value
+                another_max=entry.getValue();
+                if(entry.getKey()==null){
+                    continue;
+                }
+                value_2= entry.getKey();															//getting second max Key
+            }
+           
+        }
+		System.out.println("The Element with Maximum occurence is:- "+value+" and count of occurence is: "+max);				//print first max value and count
+		System.out.println("Second Element with Maximum occurence is:- "+value_2+" and count of occurence is: "+another_max);	//print first max value and count
+        
+    }
+}
