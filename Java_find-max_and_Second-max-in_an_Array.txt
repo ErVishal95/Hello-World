@@ -76,3 +76,34 @@ public class RemoveDuplicate{
         
     }
 }
+
+
+Input :- 10 //size of array
+	2	//elements of array
+	3
+	1
+	1
+	1
+	2
+	2
+	8
+
+Output :- Enter the digit for size of array
+	size of array :- 10
+	Array Entered is not as per size, count= 8 is less then size= 10
+	Array Entered is:- 2 3 1 1 1 2 2 8 null null 
+	ArrayList with duplicates: [2, 3, 1, 1, 1, 2, 2, 8, null, null]
+	1 2
+	1 3
+	2 2
+	2 3
+	null 2
+	Hashmep of Elements with their multiple occurenece:- {null=2, 1=3, 2=3, 3=1, 8=1}
+	The Element with Maximum occurence is:- 1 and count of occurence is: 3
+	Second Element with Maximum occurence is:- 2 and count of occurence is: 3
+	java.util.NoSuchElementException
+		at java.util.Scanner.throwFor(Scanner.java:862)
+		at java.util.Scanner.next(Scanner.java:1485)
+		at java.util.Scanner.nextInt(Scanner.java:2117)
+		at java.util.Scanner.nextInt(Scanner.java:2076)
+		at RemoveDuplicate.main(RemoveDuplicate.java:43)
