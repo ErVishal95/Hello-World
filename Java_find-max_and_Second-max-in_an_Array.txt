@@ -78,6 +78,7 @@ public class RemoveDuplicate{
 }
 
 
+
 Input :- 10 //size of array
 	2	//elements of array
 	3
