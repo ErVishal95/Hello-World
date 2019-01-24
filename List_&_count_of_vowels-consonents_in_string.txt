@@ -1,0 +1,100 @@
+//Program to find the list and count of vowels/consonents in an string.
+//Comparing Array and List for better performance(Use list for performance)
+
+package com.vishal.src;
+
+import java.util.LinkedList;
+import java.util.List;
+
+public class CheckVowels {
+	
+	
+		
+	public static char[] checkVowels(char ss[]){
+		char[] vowels= new char[ss.length];
+		char[] consonents= new char[ss.length];
+		if(ss.toString().isEmpty()){
+			System.out.println("String is blank");
+		}
+		else{
+			for(int i=0; i<ss.length; i++){
+				if(ss[i]=='a' ||ss[i]=='e' ||ss[i]=='i' ||ss[i]=='o' ||ss[i]=='u')
+					vowels[i]= ss[i];
+				else{
+					if(ss[i]==' ')
+						continue;
+					else
+						consonents[i]= ss[i];
+				}
+			}
+			System.out.print("Vowels are: ");
+			for(int i=0; i<vowels.length; i++){
+				System.out.print(vowels[i]);
+			}
+			System.out.println(" Vowel Array size "+vowels.length);
+			System.out.println();
+			
+			System.out.print("consonents are: ");
+			for(int i=0; i<consonents.length; i++){
+				System.out.print(consonents[i]);
+			}
+			System.out.println(" consonents Array size "+consonents.length);
+			System.out.println();
+			}
+		
+		return ss;
+	}
+	
+	public static List checkVowelUsingList(char ss[]){
+		List vowel= new LinkedList<Character>();
+		List consonent= new LinkedList<Character>();
+		List arrlist= new LinkedList<Character>();
+		if(ss.toString().isEmpty()){
+			System.out.println("String is blank");
+		}
+		else{
+			for(int i=0; i<ss.length; i++){
+				if(ss[i]=='a' ||ss[i]=='e' ||ss[i]=='i' ||ss[i]=='o' ||ss[i]=='u')
+					vowel.add(ss[i]);	
+				else{
+					if(ss[i]==' ')
+						continue;
+					else
+						consonent.add(ss[i]);
+				}
+			}
+			System.out.println("Vowels are: "+vowel+ " List size is "+vowel.size());
+			System.out.println("consonents are: "+consonent+ " List size is "+consonent.size());
+		}
+		arrlist.addAll(vowel);
+		arrlist.addAll(consonent);
+		
+		return arrlist;
+	}
+	
+	public static void main(String[] args) {
+		String s="Qwerty data lets check vowels";
+		char[] ss= s.toCharArray();
+		char[] string_charactors = checkVowels(ss);
+		System.out.println(string_charactors);
+		System.out.println(string_charactors.length);
+		System.out.println();
+		
+		List<Character> list= checkVowelUsingList(ss);
+		System.out.println(list);
+		System.err.println(list.size());
+	}
+}
+
+
+Output:- 
+Vowels are: e a a e e o e Vowel Array size 29
+consonents are: Qw rty d t l ts ch ck v w ls consonents Array size 29
+
+Qwerty data lets check vowels
+29
+
+Vowels are: [e, a, a, e, e, o, e] List size is 7
+consonents are: [Q, w, r, t, y, d, t, l, t, s, c, h, c, k, v, w, l, s] List size is 18
+[e, a, a, e, e, o, e, Q, w, r, t, y, d, t, l, t, s, c, h, c, k, v, w, l, s]
+25
