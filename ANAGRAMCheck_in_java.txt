@@ -1,0 +1,75 @@
+//Check whether Two strings are ANAGRAM or Not
+
+package com.vishal.src;
+
+import java.util.*;
+
+public class AnagramChecker {
+
+	public  boolean checkAnagram(String s1, String s2){
+		boolean flag=false;
+		
+		/*------------------------------Check String1 & string2 size---------------------------------*/
+		if(s1.isEmpty() || s2.isEmpty()){
+			System.out.println("One of the string is blank, can't check anagram as condition not fullfilled");
+		}
+		else if(s1.length()!=0 || s2.length()!=0){
+			if(s1.length()<s2.length()){
+				System.out.println("Strings are not Anagram string-1 size is less then string-2");
+			}
+			else if(s1.length()>s2.length()){
+				System.out.println("Strings are not Anagram string-1 size is more then string-2");
+			}
+			else{
+				/*------------------------------s1 String---------------------------------*/
+				Character[] c1= new Character[s1.length()];
+				for(int i=0; i<c1.length; i++){
+					c1[i]=s1.charAt(i);
+				}
+				ArrayList<Character> list1 = new ArrayList<Character>(Arrays.asList(c1));
+				System.out.println(list1);
+				/*------------------------------s2 String---------------------------------*/
+				
+				Character[] c2= new Character[s2.length()];
+				for(int i=0; i<c2.length; i++){
+					c2[i]=s2.charAt(i);
+				}
+				ArrayList<Character> list2 = new ArrayList<Character>(Arrays.asList(c2));
+				System.out.println(list2);
+				
+				/*------------------------------logic for checking anagram if strings size are same---------------------------------*/
+					for(Character ctr: list1){
+						if(list2.contains(ctr)){
+							list2.remove(ctr);
+						}
+					}
+					if(list2.isEmpty()){
+						flag=true;
+					}else
+						flag=false;
+				System.out.println(list1+" "+list2);
+				}
+			
+		}
+		
+		return flag;
+	}
+	public static void main(String[] args) {
+		String s1= "dove";
+		String s2= "dove";
+		
+		AnagramChecker anagramcheck = new AnagramChecker();
+		boolean flag = anagramcheck.checkAnagram(s1, s2);
+		if(flag==true){
+			System.out.println("Strings are Anagram "+s1+" "+s2);
+		}
+		else
+			System.out.println("Strings are not Anagram");
+	}
+}
+
+
+Output:- [d, o, v, e]
+		[d, o, v, e]
+		[d, o, v, e] []
+		Strings are Anagram dove dove
