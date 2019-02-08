@@ -1,0 +1,440 @@
+package TaxInvoice;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Date;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
+
+import com.itextpdf.text.BaseColor;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Element;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.FontFactory;
+import com.itextpdf.text.Image;
+import com.itextpdf.text.PageSize;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.Phrase;
+import com.itextpdf.text.pdf.BaseFont;
+import com.itextpdf.text.pdf.FontSelector;
+import com.itextpdf.text.pdf.PdfContentByte;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
+
+import Modal_TaxInvoice.Customer;
+import Modal_TaxInvoice.Product;
+import Modal_TaxInvoice.TaxInvoice;
+import Service_TaxInvoice.Service_TaxInvoice;
+import Service_TaxInvoice.Service_TaxInvoiceImpl;
+
+public class InvoiceGenerator {
+
+	public static void main(String[] args) throws IOException {
+		
+		String pdfFilename = "D:/Invoice_Ex.pdf";
+		InvoiceGenerator generateInvoice = new InvoiceGenerator();
+
+		generateInvoice.createPDF(pdfFilename);
+		
+		/*Path pdfPath = Paths.get("D:/Invoice_Ex.pdf");
+		byte[] pdf = Files.readAllBytes(pdfPath);
+		for(byte b: pdf){
+			System.out.println("  "+b);
+		}*/
+		
+	}
+	private Service_TaxInvoiceImpl stax;
+	private void createPDF (String pdfFilename){
+
+		try {
+
+			OutputStream file = new FileOutputStream(new File(pdfFilename));
+			Document document = new Document();
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			//PdfWriter.getInstance(document, file);
+			PdfWriter.getInstance(document, bos);
+			
+			document.addAuthor("Sjada");
+			document.addCreationDate();
+			document.addProducer();
+			document.addCreator("vishal");
+			document.addTitle("Invoice");
+			document.setPageSize(PageSize.LETTER);
+
+			//Inserting Image in PDF
+			Image image = Image.getInstance ("D:/test.JPG");//Header Image
+			image.scaleAbsolute(540f, 72f);//image width,height 
+
+			PdfPTable irdTable = new PdfPTable(2);
+			irdTable.addCell(getIRDCell("Invoice No"));
+			irdTable.addCell(getIRDCell("Invoice Date"));
+			
+			
+			
+			TaxInvoice l = stax.invoiceDummyData(stax.productDummyData());
+			irdTable.addCell(getIRDCell(l.getInvoiceNum())); // pass invoice number
+			irdTable.addCell(getIRDCell(l.getInvoiceDate())); // pass invoice date				
+
+			PdfPTable irhTable = new PdfPTable(3);
+			irhTable.setWidthPercentage(100);
+
+			irhTable.addCell(getIRHCell("", PdfPCell.ALIGN_RIGHT));
+			irhTable.addCell(getIRHCell("Tax Invoice", PdfPCell.ALIGN_LEFT));
+			irhTable.addCell(getIRHCell("", PdfPCell.ALIGN_RIGHT));
+			irhTable.addCell(getIRHCell("", PdfPCell.ALIGN_RIGHT));
+			irhTable.addCell(getIRHCell("", PdfPCell.ALIGN_RIGHT));
+			PdfPCell invoiceTable = new PdfPCell (irdTable);
+			invoiceTable.setBorder(0);
+			irhTable.addCell(invoiceTable);
+
+			FontSelector fs = new FontSelector();
+			Font font = FontFactory.getFont(FontFactory.TIMES_ROMAN, 13, Font.BOLD);
+			fs.addFont(font);
+			Phrase bill = fs.process("Bill To"); // customer information
+			
+			Customer c= stax.customerDummyData();
+			Paragraph name = new Paragraph(c.getName());
+			name.setIndentationLeft(20);
+			Paragraph contact = new Paragraph(c.getMobNum());
+			contact.setIndentationLeft(20);
+			Paragraph address = new Paragraph(c.getAddress());
+			address.setIndentationLeft(20);
+			Paragraph email = new Paragraph(c.getEmail());
+			email.setIndentationLeft(20);
+
+			PdfPTable billTable = new PdfPTable(6); //one page contains 15 records 
+			billTable.setWidthPercentage(100);
+			billTable.setWidths(new float[] { 1, 5,(float) 1.5,(float) 1.5,2,2 });
+			billTable.setSpacingBefore(30.0f);
+			billTable.addCell(getBillHeaderCell("S. No."));
+			billTable.addCell(getBillHeaderCell("Description"));
+			billTable.addCell(getBillHeaderCell("HSN Code"));
+			billTable.addCell(getBillHeaderCell("Rate"));
+			billTable.addCell(getBillHeaderCell("Qty (gms.)"));
+			billTable.addCell(getBillHeaderCell("Amount"));
+			
+			final AtomicLong counter = new AtomicLong();
+			List< Product> list = stax.productDummyData();
+			for(Product product: list){
+				counter.incrementAndGet();
+				billTable.addCell(getBillRowCell( counter.toString()));
+				billTable.addCell(getBillRowCell(product.getDescription()));
+				billTable.addCell(getBillRowCell(product.getHsncode()));
+				billTable.addCell(getBillRowCell(String.valueOf(product.getRate())));
+				billTable.addCell(getBillRowCell(String.valueOf(product.getQty())));
+				billTable.addCell(getBillRowCell(String.valueOf(product.getAmount())));
+				
+			}
+			if(list.size()<6){
+				
+				
+
+				billTable.addCell(getBillRowCell(" "));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+
+				billTable.addCell(getBillRowCell(" "));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+
+				billTable.addCell(getBillRowCell(" "));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+
+				billTable.addCell(getBillRowCell(" "));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+
+				billTable.addCell(getBillRowCell(" "));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+
+				billTable.addCell(getBillRowCell(" "));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+
+				billTable.addCell(getBillRowCell(" "));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+
+				billTable.addCell(getBillRowCell(" "));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+
+				billTable.addCell(getBillRowCell(" "));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+
+				billTable.addCell(getBillRowCell(" "));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+
+				billTable.addCell(getBillRowCell(" "));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+
+				billTable.addCell(getBillRowCell(" "));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+
+				}
+			else if(list.size()<10 && list.size()>4){
+				billTable.addCell(getBillRowCell(" "));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+
+				billTable.addCell(getBillRowCell(" "));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+
+				billTable.addCell(getBillRowCell(" "));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+
+				billTable.addCell(getBillRowCell(" "));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+
+				billTable.addCell(getBillRowCell(" "));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+
+				billTable.addCell(getBillRowCell(" "));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+				billTable.addCell(getBillRowCell(""));
+
+
+			}
+			
+			PdfPTable validity = new PdfPTable(1);
+			validity.setWidthPercentage(100);
+			validity.addCell(getValidityCell(" "));
+			validity.addCell(getValidityCell("Points to remember**"));
+			validity.addCell(getValidityCell(" * Products Invoice is an important document."));
+			validity.addCell(getValidityCell(" * This invoice is required to show before for resale of purchased product at store (if applicable*)"));		    
+			PdfPCell summaryL = new PdfPCell (validity);
+			summaryL.setColspan (3);
+			summaryL.setPadding (1.0f);	                   
+			billTable.addCell(summaryL);
+
+			PdfPTable accounts = new PdfPTable(2);
+			accounts.setWidthPercentage(100);
+			accounts.addCell(getAccountsCell("Subtotal"));
+			accounts.addCell(getAccountsCellR(String.valueOf(l.getSubTotal())));
+			accounts.addCell(getAccountsCell("Discount (in %)"));
+			if(l.g_Total()<10000){
+				accounts.addCell(getAccountsCellR("N/A"));
+			}
+			else
+				accounts.addCell(getAccountsCellR(String.valueOf(l.getDiscount())));
+			accounts.addCell(getAccountsCell("CGST(1.5%)"));
+			accounts.addCell(getAccountsCellR(String.valueOf(l.getCgstax())));
+			accounts.addCell(getAccountsCell("SGST(1.5%)"));
+			accounts.addCell(getAccountsCellR(String.valueOf(l.getSgstax())));
+			accounts.addCell(getAccountsCell("Grand Total"));
+			accounts.addCell(getAccountsCellR(String.valueOf(l.g_Total())));			
+			PdfPCell summaryR = new PdfPCell (accounts);
+			summaryR.setColspan (3);         
+			billTable.addCell(summaryR);  
+
+			PdfPTable describer = new PdfPTable(1);
+			describer.setWidthPercentage(100);
+			describer.addCell(getdescCell(" "));
+			describer.addCell(getdescCell("Goods once sold will not be taken back || Subject to product justification || Product damage no one responsible || "
+					+ "\n Invoice is system generated hance physical signature not required"));	
+
+			document.open();//PDF document opened........	
+
+			document.add(image);
+			document.add(irhTable);
+			document.add(bill);
+			document.add(name);
+			document.add(contact);
+			document.add(address);	
+			document.add(email);
+			document.add(billTable);
+			document.add(describer);
+
+			document.close();
+			byte[] b= bos.toByteArray();
+			File testfile = new File("D:/testfile.pdf");
+			FileOutputStream fos = new FileOutputStream(testfile);
+			fos.write(b);
+			file.close();
+
+			System.out.println("Pdf created successfully..");
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void setHeader() {
+
+	}
+
+
+	public static PdfPCell getIRHCell(String text, int alignment) {
+		FontSelector fs = new FontSelector();
+		Font font = FontFactory.getFont(FontFactory.HELVETICA, 16);
+		/*	font.setColor(BaseColor.GRAY);*/
+		fs.addFont(font);
+		Phrase phrase = fs.process(text);
+		PdfPCell cell = new PdfPCell(phrase);
+		cell.setPadding(3);
+		cell.setHorizontalAlignment(alignment);
+		cell.setBorder(PdfPCell.NO_BORDER);
+		return cell;
+	}
+
+	public static PdfPCell getIRDCell(String text) {
+		PdfPCell cell = new PdfPCell (new Paragraph (text));
+		cell.setHorizontalAlignment (Element.ALIGN_CENTER);
+		cell.setPadding (3.0f);
+		cell.setBorderColor(BaseColor.LIGHT_GRAY);
+		return cell;
+	}
+
+	public static PdfPCell getBillHeaderCell(String text) {
+		FontSelector fs = new FontSelector();
+		Font font = FontFactory.getFont(FontFactory.HELVETICA, 11);
+		font.setColor(BaseColor.GRAY);
+		fs.addFont(font);
+		Phrase phrase = fs.process(text);
+		PdfPCell cell = new PdfPCell (phrase);
+		cell.setHorizontalAlignment (Element.ALIGN_CENTER);
+		cell.setPadding (3.0f);
+		return cell;
+	}
+
+	public static PdfPCell getBillRowCell(String text) {
+		PdfPCell cell = new PdfPCell (new Paragraph (text));
+		cell.setHorizontalAlignment (Element.ALIGN_CENTER);
+		cell.setPadding (3.0f);
+		cell.setBorderWidthBottom(0);
+		cell.setBorderWidthTop(0);
+		return cell;
+	}
+
+	public static PdfPCell getBillFooterCell(String text) {
+		PdfPCell cell = new PdfPCell (new Paragraph (text));
+		cell.setHorizontalAlignment (Element.ALIGN_CENTER);
+		cell.setPadding (3.0f);
+		cell.setBorderWidthBottom(0);
+		cell.setBorderWidthTop(0);
+		return cell;
+	}
+
+	public static PdfPCell getValidityCell(String text) {
+		FontSelector fs = new FontSelector();
+		Font font = FontFactory.getFont(FontFactory.HELVETICA, 10);
+		font.setColor(BaseColor.GRAY);
+		fs.addFont(font);
+		Phrase phrase = fs.process(text);
+		PdfPCell cell = new PdfPCell (phrase);		
+		cell.setBorder(0);
+		return cell;
+	}
+
+	public static PdfPCell getAccountsCell(String text) {
+		FontSelector fs = new FontSelector();
+		Font font = FontFactory.getFont(FontFactory.HELVETICA, 10);
+		fs.addFont(font);
+		Phrase phrase = fs.process(text);
+		PdfPCell cell = new PdfPCell (phrase);		
+		cell.setBorderWidthRight(0);
+		cell.setBorderWidthTop(0);
+		cell.setPadding (3.0f);
+		return cell;
+	}
+	public static PdfPCell getAccountsCellR(String text) {
+		FontSelector fs = new FontSelector();
+		Font font = FontFactory.getFont(FontFactory.HELVETICA, 10);
+		fs.addFont(font);
+		Phrase phrase = fs.process(text);
+		PdfPCell cell = new PdfPCell (phrase);		
+		cell.setBorderWidthLeft(0);
+		cell.setBorderWidthTop(0);
+		cell.setHorizontalAlignment (Element.ALIGN_RIGHT);
+		cell.setPadding (3.0f);
+		cell.setPaddingRight(20.0f);
+		return cell;
+	}
+
+	public static PdfPCell getdescCell(String text) {
+		FontSelector fs = new FontSelector();
+		Font font = FontFactory.getFont(FontFactory.HELVETICA, 10);
+		font.setColor(BaseColor.DARK_GRAY);
+		fs.addFont(font);
+		Phrase phrase = fs.process(text);
+		PdfPCell cell = new PdfPCell (phrase);	
+		cell.setHorizontalAlignment (Element.ALIGN_CENTER);
+		cell.setBorder(0);
+		return cell;
+	}
+	
+	
+
+}
